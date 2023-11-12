@@ -42,7 +42,7 @@ jobs:
         run: |
           echo value=$(gh pr diff ${{ steps.pr_number.outputs.value }} --name-only | wc -l) >> $GITHUB_OUTPUT
   merge_pr:
-    if: ${{ needs.create_pr.outputs.no_diff == true }}
+    if: ${{ needs.create_pr.outputs.no_diff == 'true' }}
     needs:
       - create_pr
     runs-on: ubuntu-latest
@@ -57,7 +57,7 @@ jobs:
         run: |
           gh pr merge ${{ needs.create_pr.outputs.pr_number }} --auto
   remind:
-    if: ${{ needs.create_pr.outputs.no_diff == false }}
+    if: ${{ needs.create_pr.outputs.no_diff == 'false' }}
     needs:
       - create_pr
     runs-on: ubuntu-latest
