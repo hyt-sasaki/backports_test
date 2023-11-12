@@ -1,0 +1,64 @@
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  create_pr:
+    runs-on: ubuntu-latest
+    outputs:
+      pr_number: ${{ steps.pr_number.outputs.value }}
+      no_diff: ${{ steps.diff.outputs.value == '0' }}
+    steps:
+      - name: Set title name
+        id: title
+        run: |
+          echo "value=Backports $(date +'%Y-%m-%d')' >> $GITHUB_OUTPUT
+        env:
+          TZ: 'Asia/Tokyo'
+      - name: Create Pull Request (develop <- main)
+        run: |
+          gh pr create \
+            --base develop \
+            --head main \
+            --title ${{ steps.title.outputs.value }} \
+            --body 'Automatically Created by GitHub Actions.'  \
+            --label 'backports'
+      - name: Get Pull Request Number
+        id: pr_number
+        run: |
+          echo value=$( \
+            gh pr list \
+              --search "${{ steps.title.outputs.value }} in:title label:backports" \
+              --state open \
+              --json number \
+              --jq ".[].number" \
+          ) >> $GITHUB_OUTPUT
+      - name: Check Diff
+        id: diff
+        run: |
+          echo value=$(gh pr diff ${{ steps.pr_number.outputs.value }} --name-only | wc -l) >> $GITHUB_OUTPUT
+  merge_pr:
+    if: ${{ needs.create_pr.outputs.no_diff == true }}
+    needs:
+      - create_pr
+    runs-on: ubuntu-latest
+    steps:
+      - name: Approve Backport Pull Request
+        run: |
+          gh pr review ${{ needs.create_pr.outputs.pr_number }} \
+            --approve \
+            --body "This Pull Request is automatically approved."
+      - name: Merge Pull Request
+        run: |
+          gh pr merge ${{ needs.create_pr.outputs.pr_number }} --auto
+  remind:
+    if: ${{ needs.create_pr.outputs.no_diff == false }}
+    needs:
+      - create_pr
+    runs-on: ubuntu-latest
+    steps:
+      - name: Comment
+        run: |
+          gh pr comment ${{ needs.create_pr.outputs.pr_number }} \
+            --body "@hyt-sasaki Please review and merge this pull request."
