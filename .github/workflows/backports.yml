@@ -13,7 +13,7 @@ jobs:
       - name: Set title name
         id: title
         run: |
-          echo "value=Backports $(date +'%Y-%m-%d')' >> $GITHUB_OUTPUT
+          echo "value=Backports $(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
         env:
           TZ: 'Asia/Tokyo'
       - name: Create Pull Request (develop <- main)
