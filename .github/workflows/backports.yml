@@ -21,7 +21,7 @@ jobs:
           gh pr create \
             --base develop \
             --head main \
-            --title ${{ steps.title.outputs.value }} \
+            --title "${{ steps.title.outputs.value }}" \
             --body 'Automatically Created by GitHub Actions.'  \
             --label 'backports'
       - name: Get Pull Request Number
