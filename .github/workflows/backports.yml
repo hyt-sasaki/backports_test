@@ -12,6 +12,7 @@ jobs:
       pr_number: ${{ steps.pr_number.outputs.value }}
       no_diff: ${{ steps.diff.outputs.value == '0' }}
     steps:
+      - uses: actions/checkout@v4
       - name: Set title name
         id: title
         run: |
@@ -46,6 +47,7 @@ jobs:
       - create_pr
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: Approve Backport Pull Request
         run: |
           gh pr review ${{ needs.create_pr.outputs.pr_number }} \
@@ -60,6 +62,7 @@ jobs:
       - create_pr
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: Comment
         run: |
           gh pr comment ${{ needs.create_pr.outputs.pr_number }} \
